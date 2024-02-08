@@ -134,6 +134,7 @@ class CardGameGUI extends JFrame {
     private JButton dealButton;
     private JButton quitButton;
     private JScrollPane scrollPane; // ScrollPane to hold the cardPanel
+    private JLabel welcomeLabel; // JLabel for the welcome message
 
     private List<String> dealtCards; // Class-level variable to store dealt cards
 
@@ -156,6 +157,7 @@ class CardGameGUI extends JFrame {
 
         dealButton = new JButton("Deal Cards");
         quitButton = new JButton("Quit");
+        welcomeLabel = new JLabel("Welcome to the Card Dealing Program! Press 'Deal Cards' to start or 'Quit' to exit."); // Initialize the welcome message label
 
         // ActionListener for the dealButton
         dealButton.addActionListener(new ActionListener() {
@@ -182,6 +184,7 @@ class CardGameGUI extends JFrame {
         buttonPanel.add(quitButton);
 
         getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(welcomeLabel, BorderLayout.NORTH);
         getContentPane().add(cardPanel, BorderLayout.CENTER);
         getContentPane().add(buttonPanel, BorderLayout.SOUTH);
     }
