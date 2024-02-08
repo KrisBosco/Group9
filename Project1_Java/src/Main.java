@@ -1,83 +1,201 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.List;
 
 public class Main {
+    private static List<String> deck = new ArrayList<>(); // List to hold the cards in the deck
+    public static List<String> dealtCards = new ArrayList<>(); // List to hold the dealt cards
+    public static Map<String, ImageIcon> cardImages = new HashMap<>(); // Map to hold card images
+
     public static void main(String[] args) {
         System.out.println("Welcome to the Card Dealing Program!");
 
-        initializeDeck();
-        Scanner scanner = new Scanner(System.in);
+        initializeDeck(); // Initialize the deck of cards
+        loadCardImages(); // Load images for the cards
 
-        while (true) {
-            System.out.println("Press Enter to deal four cards or 'q' to quit");
-            String userInput = scanner.nextLine();
-
-            if (userInput.equals("q")) {
-                System.out.println("Thanks for playing! Goodbye!");
-                recordDealtCards();
-                break;
+        // Create and display the GUI
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new CardGameGUI().setVisible(true);
             }
-
-            dealCards();
-            recordDealtCards();
-        }
-
-        scanner.close();
+        });
     }
 
-
-    private static List<String> deck = new ArrayList<>();
-    private static List<String> dealtCards = new ArrayList<>();
-
-    public static void initializeDeck() {
-        String[] suits = {"S", "H", "D", "C"};
-        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"};
-
-        for (String suit : suits) {
-            for (String rank : ranks) {
-                String card = rank + suit;
-                deck.add(card);
-            }
-        }
-    }
-
-    public static void dealCards() {
-        if (deck.isEmpty()) {
+    // Method to deal cards from the deck
+    public static List<String> dealCards() {
+        List<String> dealtCards = new ArrayList<>(); // List to hold the newly dealt cards
+        if (deck.isEmpty()) { // Check if the deck is empty
             System.out.println("Sorry, the deck is empty");
-            return;
+            return new ArrayList<>(); // Return an empty list if the deck is empty
         }
 
-        Random rand = new Random();
+        Collections.shuffle(deck); // Shuffle the deck to randomize the order of the cards
 
+        // Clear the previous dealt cards
+        dealtCards.clear();
+
+        // Deal 4 cards
         for (int i = 0; i < 4; i++) {
-            int randomIndex = rand.nextInt(deck.size());
-            String card = deck.get(randomIndex);
+            String card = deck.remove(0); // Remove and get the first card from the deck
             System.out.println("Card " + (i + 1) + ": " + card);
-            dealtCards.add(card);
-            deck.remove(randomIndex);
+            dealtCards.add(card); // Add the dealt card to the list
         }
+
+        // Add the dealt cards back to the deck
+        deck.addAll(dealtCards);
+
+        // Record the dealt cards
+        recordDealtCards(dealtCards);
+
+        return dealtCards; // Return the list of dealt cards
     }
 
-    public static void recordDealtCards() {
-        if (dealtCards.isEmpty()) {
+    // Method to record the dealt cards
+    public static void recordDealtCards(List<String> dealtCards) {
+        if (dealtCards.isEmpty()) { // Check if there are any dealt cards
             return;
         }
 
+        System.out.print("Current working directory: " + System.getProperty("user.dir"));
+        
         try (PrintWriter outFile = new PrintWriter(new FileWriter("CardsDealt.txt", true))) {
             SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
             Date currentTime = new Date();
             outFile.println(dateFormat.format(currentTime));
 
             for (String card : dealtCards) {
-                outFile.print(card + ", ");
+                outFile.print(card + ", "); // Write each dealt card to the file
             }
             outFile.println();
         } catch (IOException e) {
-            System.err.println("Error opening file");
+            System.err.println("Error opening file"); // Handle file writing errors
         }
     }
 
+    // Method to initialize the deck of cards
+    public static void initializeDeck() {
+        String[] suits = {"S", "H", "D", "C"}; // Array of suits
+        String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}; // Array of ranks
+
+        // Generate all possible combinations of suits and ranks to create the deck
+        for (String suit : suits) {
+            for (String rank : ranks) {
+                String card = rank + suit;
+                deck.add(card); // Add the card to the deck
+            }
+        }
+    }
+
+    // Method to load images for all the cards
+    private static void loadCardImages() {
+        try {
+            String[] suits = {"S", "H", "D", "C"}; // Array of suits
+            String[] ranks = {"2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"}; // Array of ranks
+
+            // Iterate through all combinations of suits and ranks to load the images
+            for (String suit : suits) {
+                for (String rank : ranks) {
+                    String cardName = rank + suit; // Generate the card name
+                    String imagePath = "/images/" + cardName + ".png"; // Construct the path to the image
+                    cardImages.put(cardName, new ImageIcon(Main.class.getResource(imagePath))); // Load the image and add it to the map
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace(); // Handle any errors that occur during image loading
+        }
+    }
+}
+
+// GUI class for the card game
+class CardGameGUI extends JFrame {
+    private JPanel cardPanel;
+    private JButton dealButton;
+    private JButton quitButton;
+    private JScrollPane scrollPane; // ScrollPane to hold the cardPanel
+
+    private List<String> dealtCards; // Class-level variable to store dealt cards
+
+    // Constructor to initialize the GUI components
+    public CardGameGUI() {
+        setTitle("Card Dealing Program");
+        setSize(300, 200);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        initComponents(); // Initialize the GUI components
+        layoutComponents(); // Layout the GUI components
+        setLocationRelativeTo(null); // Center the window on the screen
+    }
+
+    // Method to initialize the GUI components
+    private void initComponents() {
+        cardPanel = new JPanel();
+        cardPanel.setLayout(new FlowLayout());
+        scrollPane = new JScrollPane(cardPanel); // Wrap the cardPanel in a JScrollPane
+
+        dealButton = new JButton("Deal Cards");
+        quitButton = new JButton("Quit");
+
+        // ActionListener for the dealButton
+        dealButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dealtCards = Main.dealCards(); // Deal cards
+                displayDealtCards(dealtCards); // Display the dealt cards
+            }
+        });
+
+        // ActionListener for the quitButton
+        quitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                quitGame(); // Quit the game
+            }
+        });
+    }
+
+    // Method to layout the GUI components
+    private void layoutComponents() {
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.add(dealButton);
+        buttonPanel.add(quitButton);
+
+        getContentPane().setLayout(new BorderLayout());
+        getContentPane().add(cardPanel, BorderLayout.CENTER);
+        getContentPane().add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    // Method to display the dealt cards
+    private void displayDealtCards(List<String> cards) {
+        // Clear existing cards
+        cardPanel.removeAll();
+        cardPanel.revalidate();
+        cardPanel.repaint();
+
+        // Display dealt cards
+        for (String card : cards) {
+            ImageIcon cardImage = Main.cardImages.get(card); // Get the image for the card
+            if (cardImage != null) {
+                JLabel label = new JLabel(cardImage); // Create a JLabel with the image
+                cardPanel.add(label); // Add the JLabel to the cardPanel
+            }
+        }
+        pack(); // Adjust layout
+
+        Main.recordDealtCards(dealtCards); // Record the dealt cards
+    }
+
+    // Method to quit the game
+    private void quitGame() {
+        Main.recordDealtCards(dealtCards); // Record the dealt cards
+        System.out.println("Thanks for playing! Goodbye!"); // Print a message to the console
+        System.exit(0); // Exit the program
+    }
 }
