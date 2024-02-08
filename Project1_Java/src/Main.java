@@ -1,3 +1,17 @@
+/*
+  Author: Kyle Pensiton
+  Date: February 8, 2024
+  
+  Project Title: Random Card Selection Program
+  
+  Description:
+  This program generates a random playing card from a standard deck of 52 cards. 
+  It utilizes the random module to select a random suit (hearts, diamonds, clubs, spades)
+  and a random rank (Ace through King). The selected cards are then displayed to the user. 
+  The program also includes a GUI interface where users can deal cards and view the dealt cards.
+  Dealt cards are recorded in a text file, CardsDealt.txt, along with the timestamp of the deal.
+*/
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
