@@ -67,7 +67,7 @@ public class Main {
         deck.addAll(dealtCards);
 
         // Record the dealt cards
-        recordDealtCards(dealtCards);
+        //recordDealtCards(dealtCards);
 
         return dealtCards; // Return the list of dealt cards
     }
@@ -81,12 +81,18 @@ public class Main {
         System.out.print("Current working directory: " + System.getProperty("user.dir"));
         
         try (PrintWriter outFile = new PrintWriter(new FileWriter("CardsDealt.txt", true))) {
-            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+            SimpleDateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
             Date currentTime = new Date();
             outFile.println(dateFormat.format(currentTime));
 
+            boolean lastCard = true;
             for (String card : dealtCards) {
-                outFile.print(card + ", "); // Write each dealt card to the file
+                if (!lastCard){
+                    outFile.print(", "); // Write each dealt card to the file
+                } else {
+                    lastCard = false;
+                }
+                outFile.print(card);
             }
             outFile.println();
         } catch (IOException e) {
@@ -165,6 +171,7 @@ class CardGameGUI extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 dealtCards = Main.dealCards(); // Deal cards
                 displayDealtCards(dealtCards); // Display the dealt cards
+                Main.recordDealtCards(dealtCards); // Record cards and timestamp
             }
         });
 
@@ -206,12 +213,10 @@ class CardGameGUI extends JFrame {
         }
         pack(); // Adjust layout
 
-        Main.recordDealtCards(dealtCards); // Record the dealt cards
     }
 
     // Method to quit the game
     private void quitGame() {
-        Main.recordDealtCards(dealtCards); // Record the dealt cards
         System.out.println("Thanks for playing! Goodbye!"); // Print a message to the console
         System.exit(0); // Exit the program
     }
