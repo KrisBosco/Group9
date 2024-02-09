@@ -66,9 +66,6 @@ public class Main {
         // Add the dealt cards back to the deck
         deck.addAll(dealtCards);
 
-        // Record the dealt cards
-        //recordDealtCards(dealtCards);
-
         return dealtCards; // Return the list of dealt cards
     }
 
